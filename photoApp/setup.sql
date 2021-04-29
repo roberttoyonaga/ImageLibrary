@@ -33,9 +33,18 @@ create table Photos
   sizeBytes int,
   captureDate datetime,
   ownerID int not null,
+  format varchar(3) not null,
 -- Constraints
+  check (format = "png" or format = "jpg"), -- only accept these formats for now
   unique(name),
   unique(reference),
   foreign key (ownerID) references Users(userID),
   primary key (photoID)
 );
+
+INSERT INTO Users (username, password, userType) VALUES ("shopify", "challenge", "individual");
+INSERT INTO Users (username, password, userType) VALUES ("robert", "toyonaga", "individual");
+INSERT INTO Photos (name, reference, sizeBytes,captureDate,ownerID, format) 
+VALUES ("dog", "/home/ImageLibrary/images/collection/dog.png", 19216, NULL,1, "png");
+INSERT INTO Photos (name, reference, sizeBytes,captureDate,ownerID, format) 
+VALUES ("flower", "/home/ImageLibrary/images/collection/flower.png", 62645, NULL,2, "jpg")

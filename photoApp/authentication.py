@@ -129,7 +129,7 @@ def authentication(db_connection):
 
         # set up query
         query = ("SELECT username, password FROM Users "
-                "WHERE username=%s AND password=%s ") # don't need to add in \" for strings! 
+                "WHERE username=%s AND password=%s ")
         cursor.execute(query, (username, user_password))
         result_row = cursor.fetchone()
         if result_row is None:

@@ -1,19 +1,35 @@
 import mysql.connector as mysql
-def HasAccess(db_connection, username, ownerID):
-    pass
-def search(db_connection, username):
+import shutil
+from time import gmtime, strftime
+import os
+
+def HasAccess(cursor, username, ownerID):
+    # check if the userID for this username matches the ownerID for the image we are interested in
+    cursor.execute("SELECT userID, username FROM Users WHERE username='{}'".format(username))
     
+    # there should only be one row  because there is a unique constraint on username
+    result_row = cursor.fetchone() 
+    if result_row[0]==ownerID:
+        return True
+    else:
+        return False
+
+def search(db_connection, username):
+    current_time = strftime("%Y-%m-%d %H:%M:%S", gmtime())
     cursor = db_connection.cursor()
     method = ""
     while method != "1" and method != "2" and method != "3":
         method = input("How sould you like to search?\n 1: By image name\n 2: By tag\n 3: By Date \n")
         if method == "1":
             name = input("Image Name: ")
-            cursor.execute("SELECT name, reference, ownerID FROM Photos WHERE name='{}'".format(name))
+            cursor.execute("SELECT name, reference, ownerID,format FROM Photos WHERE name='{}'".format(name))
             
-            for (_, reference, ownerID) in cursor:
-                if HasAccess(db_connection, username, ownerID):
-                    pass #do work
+            for (name, reference, ownerID, format) in cursor:
+                if HasAccess(cursor, username, ownerID):
+                    directory = "/home/ImageLibrary/images/results_"+current_time
+                    if not os.path.exists(directory):
+                        os.makedirs(directory)
+                    shutil.copy2(reference, directory+"/"+name+"."+format)
                 else:
                     print("Sorry, image could not be found or you do not have access to this image.")
         elif method == "2":
