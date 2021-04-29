@@ -6,9 +6,10 @@ services:
       volumes:
         - mysql_volume:/var/lib/mysql 
         - ./images:/home/ImageLibrary/images 
+        - ./photoApp:/home/ImageLibrary/photoApp 
       ports:
         - 3306:3306
       container_name: photoAppContainer
 volumes: 
-  mysql_volume:
+  mysql_volume: # valid comment need to delete this to remake database
 
