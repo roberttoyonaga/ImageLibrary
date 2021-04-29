@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+    photo-app:
+      build: ./photoApp
+      volumes:
+        - mysql_volume:/var/lib/mysql 
+        - ./images:/home/ImageLibrary/images 
+      ports:
+        - 3306:3306
+      container_name: photoAppContainer
+volumes: 
+  mysql_volume:
+
