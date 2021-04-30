@@ -44,7 +44,9 @@ create table Photos
 
 INSERT INTO Users (username, password, userType) VALUES ("shopify", "challenge", "individual");
 INSERT INTO Users (username, password, userType) VALUES ("robert", "toyonaga", "individual");
+
 INSERT INTO Photos (name, reference, sizeBytes,captureDate,ownerID, format) 
 VALUES ("dog", "/home/ImageLibrary/images/collection/dog.png", 19216, NULL,1, "png");
+
 INSERT INTO Photos (name, reference, sizeBytes,captureDate,ownerID, format) 
-VALUES ("flower", "/home/ImageLibrary/images/collection/flower.png", 62645, NULL,2, "jpg")
+VALUES ("flower", "/home/ImageLibrary/images/collection/flower.png", 62645, NULL,2, "jpg");

@@ -19,7 +19,7 @@ def search(db_connection, username):
     cursor = db_connection.cursor()
     method = ""
     while method != "1" and method != "2" and method != "3":
-        method = input("How sould you like to search?\n 1: By image name\n 2: By tag\n 3: By Date \n")
+        method = input("How sould you like to search?\n 1: By image name\n 2: By tag\n 3: By Date\n 4: Show all images available current user\n")
         if method == "1":
             name = input("Image Name: ")
             cursor.execute("SELECT name, reference, ownerID,format FROM Photos WHERE name='{}'".format(name))
@@ -36,6 +36,11 @@ def search(db_connection, username):
             pass
         elif method == "3":
             pass
+        elif method == "4":
+            cursor.execute("SELECT name, reference, ownerID,format FROM Photos INNER JOIN Users ON Users.userID = Photos.ownerID WHERE username='{}'".format(username))
+            print("\nYou have access to these photos:\n")
+            for (name, reference, ownerID, format) in cursor:
+                print(name, reference, ownerID, format,"\n\n")
         
     return
 
