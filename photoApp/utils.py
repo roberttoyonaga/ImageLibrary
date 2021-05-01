@@ -25,6 +25,7 @@ def has_access(cursor, username, ownerID):
 
 def search(db_connection, username):
     current_time = strftime(time_format, gmtime())
+    directory = "/home/ImageLibrary/images/results_"+current_time
     cursor = db_connection.cursor()
     method = ""
     while method != "1" and method != "2" and method != "3":
@@ -34,22 +35,61 @@ def search(db_connection, username):
             cursor.execute("SELECT name, reference, ownerID,format FROM Photos WHERE name='{}'".format(name))
             
             for (name, reference, ownerID, format) in cursor:
-                if HasAccess(cursor, username, ownerID):
-                    directory = "/home/ImageLibrary/images/results_"+current_time
+                if has_access(cursor, username, ownerID):
                     if not os.path.exists(directory):
                         os.makedirs(directory)
                     shutil.copy2(reference, directory+"/"+name+"."+format)
                 else:
                     print("Sorry, image could not be found or you do not have access to this image.")
         elif method == "2":
-            pass
+
+            #Get the desired tags from the user
+            print("These are all the available tags")
+            cursor.execute("SELECT tagName FROM Tags")
+            for (tagName) in cursor:
+                print(tagName,"\n")
+
+            requested_tags = input("Add tags separated by spaces: \n").split()
+
+            #compose the query
+            query = '''
+                SELECT photoID 
+                FROM Tags 
+                JOIN PhotoTags using(tagID) 
+                JOIN Photos using(photoID) 
+                GROUP BY photoID
+                HAVING 
+                SUM(CASE WHEN Photos.ownerID = '{}' THEN 1 ELSE 0 END) > 0 '''.format(get_ownerID(db_connection, username))
+
+            for tag in requested_tags:
+                query += " AND SUM(CASE WHEN Tags.tagName = '{}' THEN 1 ELSE 0 END) > 0  ".format(tag)
+
+            query+=";"
+            #print("\n\n",query, '\n\n')
+            cursor.execute(query)
+            matching_photos = []
+            for photoID in cursor:
+                matching_photos.append(photoID[0])
+            
+            
+            for photoID in matching_photos:
+                print("photoID ", photoID)
+                cursor.execute("SELECT name, reference, ownerID,format FROM Photos WHERE photoID='{}'".format(photoID))
+                if not os.path.exists(directory):
+                    os.makedirs(directory)
+                for (name, reference, ownerID, format) in cursor:
+                    print(name, reference, ownerID, format)
+                    shutil.copy2(reference, directory+"/"+name+"."+format)
+                
         elif method == "3":
             pass
+
         elif method == "4":
             cursor.execute("SELECT name, reference, ownerID,format FROM Photos INNER JOIN Users ON Users.userID = Photos.ownerID WHERE username='{}'".format(username))
             print("\nYou have access to these photos:\n")
             for (name, reference, ownerID, format) in cursor:
                 print(name, reference, ownerID, format,"\n\n")
+
     cursor.close()     
     return
 

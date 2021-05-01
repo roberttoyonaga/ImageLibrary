@@ -42,6 +42,31 @@ create table Photos
   primary key (photoID)
 );
 
+select '----------------------------------------------------------------' as '';
+select 'Create Tags' as '';
+create table Tags
+(
+  tagID int not null auto_increment,
+  tagName varchar(50) not null,
+-- Constraints
+  unique(tagName),
+  primary key (tagID)
+);
+
+select '----------------------------------------------------------------' as '';
+select 'Create PhotoTags' as '';
+create table PhotoTags
+(
+  tagID int not null ,
+  photoID int not null,
+-- Constraints
+  unique(tagID,photoID),
+  foreign key (tagID) references Tags(tagID),
+  foreign key (photoID) references Photos(photoID)
+);
+
+
+-- add some data so our database isn't completely empty
 INSERT INTO Users (username, password, userType) VALUES ("shopify", "challenge", "individual");
 INSERT INTO Users (username, password, userType) VALUES ("robert", "toyonaga", "individual");
 
@@ -50,3 +75,12 @@ VALUES ("dog", "/home/ImageLibrary/images/collection/dog.png", 19216, NULL,1, "p
 
 INSERT INTO Photos (name, reference, sizeBytes,captureDate,ownerID, format) 
 VALUES ("flower", "/home/ImageLibrary/images/collection/flower.png", 62645, NULL,2, "jpg");
+
+INSERT INTO Tags (tagName) VALUES ("dog");
+INSERT INTO Tags (tagName) VALUES ("flower");
+INSERT INTO Tags (tagName) VALUES ("life");
+
+INSERT INTO PhotoTags (tagID,photoID) VALUES (1,1);
+INSERT INTO PhotoTags (tagID,photoID) VALUES (2,2);
+INSERT INTO PhotoTags (tagID,photoID) VALUES (3,1);
+INSERT INTO PhotoTags (tagID,photoID) VALUES (3,2);
