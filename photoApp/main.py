@@ -69,7 +69,7 @@ if __name__ == "__main__":
             if option == 'search':
                 search(db_connection, username)
             elif option == 'add':
-                pass
+                add(db_connection, username)
             elif option == 'delete':
                 pass
             elif option == 'edit':

@@ -1,9 +1,18 @@
 import mysql.connector as mysql
 import shutil
-from time import gmtime, strftime
+import datetime
+from time import gmtime, strftime, ctime
 import os
+time_format = '%Y-%m-%d %H:%M:%S'
 
-def HasAccess(cursor, username, ownerID):
+def get_ownerID(db_connection, username):
+    cursor = db_connection.cursor()
+    cursor.execute("SELECT username, userID FROM Users WHERE username='{}'".format(username))
+    ownerID = cursor.fetchone()[1] 
+    cursor.close()
+    return ownerID
+
+def has_access(cursor, username, ownerID):
     # check if the userID for this username matches the ownerID for the image we are interested in
     cursor.execute("SELECT userID, username FROM Users WHERE username='{}'".format(username))
     
@@ -15,7 +24,7 @@ def HasAccess(cursor, username, ownerID):
         return False
 
 def search(db_connection, username):
-    current_time = strftime("%Y-%m-%d %H:%M:%S", gmtime())
+    current_time = strftime(time_format, gmtime())
     cursor = db_connection.cursor()
     method = ""
     while method != "1" and method != "2" and method != "3":
@@ -41,8 +50,26 @@ def search(db_connection, username):
             print("\nYou have access to these photos:\n")
             for (name, reference, ownerID, format) in cursor:
                 print(name, reference, ownerID, format,"\n\n")
-        
+    cursor.close()     
     return
 
+def add(db_connection, username):
+    reference = input("Absolute path to image in container or volume (/home/ImageLibrary/images): ")
+    file=os.path.basename(reference)
+    name = os.path.splitext(file)[0]
+    format = os.path.splitext(file)[1][1:]
+    ownerID = get_ownerID(db_connection, username)
+    sizeBytes = os.path.getsize(reference)
+    captureTime_ctime =ctime(os.path.getctime(reference))
+    captureTime_datetime = datetime.datetime.strptime(captureTime_ctime, "%a %b %d %H:%M:%S %Y").strftime(time_format)
 
 
+    cursor = db_connection.cursor()
+
+    add_user = ("INSERT INTO Photos (name, reference, sizeBytes,captureDate, ownerID, format) VALUES (%s, %s, %s,%s, %s, %s)")
+    data_user = (name, reference, sizeBytes, captureTime_datetime,ownerID, format)
+    cursor.execute(add_user, data_user)
+    
+    db_connection.commit()
+    shutil.copy2(reference, "/home/ImageLibrary/images/collection/"+file)
+    cursor.close()
