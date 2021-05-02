@@ -101,9 +101,22 @@ def add(db_connection, username):
         method = input("How would you like to add?\n 1: From Local machine\n 2: From URL\n")
         if method == "1":
             reference = input("Absolute path to image in docker volume (/home/ImageLibrary/images): ")
+            if not os.path.isfile(reference):
+                print("Please ensure this file exists")
+                method = "-1"
+                continue 
             file=os.path.basename(reference)
             name = os.path.splitext(file)[0]
             format = os.path.splitext(file)[1][1:]
+
+            if format=="jpg" or format=="JPG" or format=="jpeg" or format=="JPEG":
+                format = "jpg"
+            elif format=="PNG" or format=="png":
+                format = "png"
+            else:
+                print("Sorry, currently only .png and .jpg files are supported.\n")
+                method = "-1"
+                continue
             
             sizeBytes = os.path.getsize(reference)
             captureTime_ctime =ctime(os.path.getctime(reference))
@@ -118,11 +131,29 @@ def add(db_connection, username):
     
         if method == "2":
             url = input("Provide the image URL: ")
-            r = requests.get(url, allow_redirects=True)
+            
+            r = None
+            try:
+                r = requests.get(url, allow_redirects=True)
+            except:
+                print("Sorry, that URl does not seem to be valid\n")
+                method = "-1"
+                continue
+            
 
             file = url.rsplit('/', 1)[1]
             name = file.split('.')[0]
-            format = file.split('.')[1] #should check if format is correct
+            format = file.split('.')[1] 
+
+            if format=="jpg" or format=="JPG" or format=="jpeg" or format=="JPEG":
+                format = "jpg"
+            elif format=="PNG" or format=="png":
+                format = "png"
+            else:
+                print("Sorry, currently only .png and .jpg files are supported.")
+                method = "-1"
+                continue
+
             open(collection_dest+file, 'wb').write(r.content)
             sizeBytes = os.path.getsize(collection_dest+file)
 
