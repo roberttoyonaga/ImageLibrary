@@ -3,6 +3,8 @@ import shutil
 import datetime
 from time import gmtime, strftime, ctime
 import os
+import requests
+
 time_format = '%Y-%m-%d %H:%M:%S'
 
 def get_ownerID(cursor, username):
@@ -27,7 +29,7 @@ def search(db_connection, username):
     cursor = db_connection.cursor()
     method = ""
     while method != "1" and method != "2":
-        method = input("How sould you like to search?\n 1: By image name\n 2: By tag\n 3: Show all images available current user\n")
+        method = input("How would you like to search?\n 1: By image name\n 2: By tag\n 3: Show all images available current user\n")
         if method == "1":
             name = input("Image Name: ")
             cursor.execute("SELECT name, reference, ownerID,format FROM Photos WHERE name='{}'".format(name))
@@ -91,25 +93,45 @@ def search(db_connection, username):
 def add(db_connection, username):
     cursor = db_connection.cursor()
     collection_dest = "/home/ImageLibrary/images/collection/"
-    #add image
-    reference = input("Absolute path to image in container or volume (/home/ImageLibrary/images): ")
-    file=os.path.basename(reference)
-    name = os.path.splitext(file)[0]
-    format = os.path.splitext(file)[1][1:]
     ownerID = get_ownerID(cursor, username)
-    sizeBytes = os.path.getsize(reference)
-    captureTime_ctime =ctime(os.path.getctime(reference))
-    captureTime_datetime = datetime.datetime.strptime(captureTime_ctime, "%a %b %d %H:%M:%S %Y").strftime(time_format)
 
+    #add image
+    method = ""
+    while method != "1" and method != "2":
+        method = input("How would you like to add?\n 1: From Local machine\n 2: From URL\n")
+        if method == "1":
+            reference = input("Absolute path to image in docker volume (/home/ImageLibrary/images): ")
+            file=os.path.basename(reference)
+            name = os.path.splitext(file)[0]
+            format = os.path.splitext(file)[1][1:]
+            
+            sizeBytes = os.path.getsize(reference)
+            captureTime_ctime =ctime(os.path.getctime(reference))
+            captureTime_datetime = datetime.datetime.strptime(captureTime_ctime, "%a %b %d %H:%M:%S %Y").strftime(time_format)
 
+            add_image = ("INSERT INTO Photos (name, reference, sizeBytes,captureDate, ownerID, format) VALUES (%s, %s, %s,%s, %s, %s)")
+            data_image = (name, collection_dest+file, sizeBytes, captureTime_datetime,ownerID, format)
+            cursor.execute(add_image, data_image)
+
+            #copy the file into the collections directory
+            shutil.copyfile(reference, "/home/ImageLibrary/images/collection/"+file)
     
+        if method == "2":
+            url = input("Provide the image URL: ")
+            r = requests.get(url, allow_redirects=True)
 
-    add_user = ("INSERT INTO Photos (name, reference, sizeBytes,captureDate, ownerID, format) VALUES (%s, %s, %s,%s, %s, %s)")
-    data_user = (name, collection_dest+file, sizeBytes, captureTime_datetime,ownerID, format)
-    cursor.execute(add_user, data_user)
-    
+            file = url.rsplit('/', 1)[1]
+            name = file.split('.')[0]
+            format = file.split('.')[1] #should check if format is correct
+            open(collection_dest+file, 'wb').write(r.content)
+            sizeBytes = os.path.getsize(collection_dest+file)
+
+            add_image = ("INSERT INTO Photos (name, reference, sizeBytes,captureDate, ownerID, format) VALUES (%s, %s, %s,%s, %s, %s)")
+            data_image = (name, collection_dest+file, sizeBytes, None, ownerID, format)
+            cursor.execute(add_image, data_image)
+
     db_connection.commit()
-    shutil.copyfile(reference, "/home/ImageLibrary/images/collection/"+file)
+    
 
     # add tags
     tags = input("Add tags separated by whitespace: \n")
