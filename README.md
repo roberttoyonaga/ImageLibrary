@@ -22,6 +22,6 @@ Images are output to `images/results_Current_Time`.
 Admin users can add new images using two methods: From their local machine, or from the internet. Images will be added to `images/collection`. When adding an image, users can choose to add tags as well. Images added from a local machine should be added from the mounted docker container volume. For simplicity, images can be first dropped into the `images/images_to_add` folder. This is not ideal, but it allows for an easy transfer of files between the docker container and the host machine's filesystem.
 
 ## Testing
-Unit tests can be found in `/photoApp/tests/test_photoApp.py` and can be run using `python3 -m unittest photoApp/tests/test_photoApp.py` from the root directory of the repository.
+Unit tests can be found in `/photoApp/tests/test_photoApp.py` and can be run using `docker exec -it photoAppContainer python3 -m unittest /home/ImageLibrary/photoApp/tests/test_photoApp.py` from the root directory of the repository.
 
 
