@@ -90,6 +90,23 @@ def search(db_connection, username):
     cursor.close()     
     return
 
+def process_reference(reference):
+    file = reference.rsplit('/', 1)[1]
+    name = file.split('.')[0]
+    format = file.split('.')[1] 
+    
+    return (file, name, format)
+
+def get_valid_format(format):
+    if format=="jpg" or format=="JPG" or format=="jpeg" or format=="JPEG":
+        return "jpg"
+    elif format=="PNG" or format=="png":
+        return "png"
+    else:
+        return None
+    
+    
+
 def add(db_connection, username):
     cursor = db_connection.cursor()
     collection_dest = "/home/ImageLibrary/images/collection/"
@@ -105,19 +122,13 @@ def add(db_connection, username):
                 print("Please ensure this file exists")
                 method = "-1"
                 continue 
-            file=os.path.basename(reference)
-            name = os.path.splitext(file)[0]
-            format = os.path.splitext(file)[1][1:]
 
-            if format=="jpg" or format=="JPG" or format=="jpeg" or format=="JPEG":
-                format = "jpg"
-            elif format=="PNG" or format=="png":
-                format = "png"
-            else:
+            (file, name, format) = process_reference(reference)
+            if get_valid_format(format) == None:
                 print("Sorry, currently only .png and .jpg files are supported.\n")
-                method = "-1"
-                continue
-            
+                method = "-1"     
+                continue   
+
             sizeBytes = os.path.getsize(reference)
             captureTime_ctime =ctime(os.path.getctime(reference))
             captureTime_datetime = datetime.datetime.strptime(captureTime_ctime, "%a %b %d %H:%M:%S %Y").strftime(time_format)
@@ -141,18 +152,11 @@ def add(db_connection, username):
                 continue
             
 
-            file = url.rsplit('/', 1)[1]
-            name = file.split('.')[0]
-            format = file.split('.')[1] 
-
-            if format=="jpg" or format=="JPG" or format=="jpeg" or format=="JPEG":
-                format = "jpg"
-            elif format=="PNG" or format=="png":
-                format = "png"
-            else:
-                print("Sorry, currently only .png and .jpg files are supported.")
-                method = "-1"
-                continue
+            (file, name, format) = process_reference(url)
+            if get_valid_format(format) == None:
+                print("Sorry, currently only .png and .jpg files are supported.\n")
+                method = "-1"  
+                continue      
 
             open(collection_dest+file, 'wb').write(r.content)
             sizeBytes = os.path.getsize(collection_dest+file)

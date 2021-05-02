@@ -11,7 +11,6 @@ if __name__ == "__main__":
     USER = "user"
     PASSWORD = "photoPassword"
     db_connection = mysql.connect(host=HOST, database=DATABASE, user=USER, password=PASSWORD)
-    print("Connected to:", db_connection.get_server_info())
 
     username = ""
     # Step 1: register(a) or access data(b)
