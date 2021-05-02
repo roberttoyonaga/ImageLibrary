@@ -6,7 +6,6 @@ ENV MYSQL_DATABASE photoDB
 ENV MYSQL_USER user
 ENV MYSQL_PASSWORD photoPassword
 EXPOSE 3306
-
 # add the repo
 ADD . /home/ImageLibrary/photoApp
 

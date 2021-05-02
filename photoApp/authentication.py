@@ -1,6 +1,12 @@
 from getpass import getpass
 import mysql.connector as mysql
+import hashlib
 
+def hash_password(password):
+    return hashlib.sha3_256(password.encode()).hexdigest()
+
+def check_password(password, hashed_password):
+    return hashlib.sha3_256(password.encode()).hexdigest() == hashed_password
 
 def edit_account(db_connection, username):
     """
@@ -29,7 +35,7 @@ def edit_account(db_connection, username):
                 print("Password must be between 5-10 letters\n")
 
         query = "UPDATE Users SET password=%s WHERE username=%s"
-        cursor.execute(query, (new_password, username))
+        cursor.execute(query, (hash_password(new_password), username))
         db_connection.commit()
         print("Password changed\n")
     elif action == "2":
@@ -95,7 +101,7 @@ def registration(db_connection):
     add_user = ("INSERT INTO Users "
                 "(username, password, userType) "
                 "VALUES (%s, %s, %s)")
-    data_user = (username, user_password, user_type)
+    data_user = (username, hash_password(user_password), user_type)
     cursor.execute(add_user, data_user)
 
     # Make sure data is committed to the database
@@ -130,11 +136,11 @@ def authentication(db_connection):
         # set up query
         query = ("SELECT username, password FROM Users "
                 "WHERE username=%s AND password=%s ")
-        cursor.execute(query, (username, user_password))
+        cursor.execute(query, (username, hash_password(user_password)))
         result_row = cursor.fetchone()
         if result_row is None:
             print("Login failed")
-        elif result_row[0]==username and result_row[1] == user_password:
+        elif result_row[0]==username and  check_password(user_password, result_row[1]):
             success = True
         else:
             print("Login failed")

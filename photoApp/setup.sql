@@ -16,7 +16,7 @@ create table Users
 (
   userID int not null AUTO_INCREMENT,
   username varchar(20) not null,
-  password varchar(20) not null,
+  password varchar(150) not null,
   userType enum('admin', 'individual'),
   -- Constraints
   unique(username),
@@ -67,14 +67,14 @@ create table PhotoTags
 
 
 -- add some data so our database isn't completely empty
-INSERT INTO Users (username, password, userType) VALUES ("shopify", "challenge", "individual");
-INSERT INTO Users (username, password, userType) VALUES ("robert", "toyonaga", "individual");
+INSERT INTO Users (username, password, userType) VALUES ("default_user", 'e770610ca6f153d9f1ab1f3bf3bc2fc77065d6f13f0eb668a45c2237648a0622', "admin");
+-- INSERT INTO Users (username, password, userType) VALUES ("robert", "toyonaga", "individual");
 
 INSERT INTO Photos (name, reference, sizeBytes,captureDate,ownerID, format) 
-VALUES ("dog", "/home/ImageLibrary/images/collection/dog.png", 19216, NULL,1, "png");
+VALUES ("dog", "/home/ImageLibrary/images/collection/dog.png", 19216, NULL, 1, "png");
 
 INSERT INTO Photos (name, reference, sizeBytes,captureDate,ownerID, format) 
-VALUES ("flower", "/home/ImageLibrary/images/collection/flower.png", 62645, NULL,2, "jpg");
+VALUES ("flower", "/home/ImageLibrary/images/collection/flower.png", 62645, NULL, 1, "jpg");
 
 INSERT INTO Tags (tagName) VALUES ("dog");
 INSERT INTO Tags (tagName) VALUES ("flower");
