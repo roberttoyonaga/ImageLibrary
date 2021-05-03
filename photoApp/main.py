@@ -69,10 +69,6 @@ if __name__ == "__main__":
                 search(db_connection, username)
             elif option == 'add':
                 add(db_connection, username)
-            elif option == 'delete':
-                pass
-            elif option == 'edit':
-                pass
 
     print("Application closed. Thank you!")
     db_connection.close()

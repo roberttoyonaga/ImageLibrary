@@ -1,6 +1,6 @@
 import unittest
-from utils import * 
-from authentication import *
+from .authentication import *
+from .utils import *
 
 class TestReferenceProcessing(unittest.TestCase):
 
@@ -27,6 +27,21 @@ class TestDatabase(unittest.TestCase):
 
         ownerID = get_ownerID(cursor, "default_user")
         self.assertEqual(ownerID, 1, "Getting photo ownerID failed")
+        cursor.close()
 
+    def test_login(self):
+        HOST = "localhost"
+        DATABASE = "photoDB"
+        USER = "user"
+        PASSWORD = "photoPassword"
+        db_connection = mysql.connect(host=HOST, database=DATABASE, user=USER, password=PASSWORD)
+        cursor = db_connection.cursor()
+
+
+        self.assertEqual(login_successful(cursor, "default_user", "password_1"), True, "Valid login failed")
+        self.assertEqual(login_successful(cursor, "random_999!*&281", "abc"), False, "Short password login should fail")
+        self.assertEqual(login_successful(cursor, "default_user", "incorrect_5"), False, "Incorrect password login should fail")
+
+        cursor.close()
 if __name__ == '__main__':
     unittest.main()

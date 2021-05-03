@@ -112,6 +112,17 @@ def registration(db_connection):
     print("--- Thank you for registering! ---\n")
     return username
 
+def login_successful(cursor, username, password):
+    query = ("SELECT username, password FROM Users "
+                "WHERE username=%s AND password=%s ")
+
+    cursor.execute(query, (username, hash_password(password)))
+    result_row = cursor.fetchone()
+    if result_row is None:
+        return False
+    elif result_row[0]==username and  check_password(password, result_row[1]):
+        return True
+    return False
 
 def authentication(db_connection):
     """
@@ -133,19 +144,12 @@ def authentication(db_connection):
         username = input("Username: ")
         user_password =  getpass("Password: ")
 
-        # set up query
-        query = ("SELECT username, password FROM Users "
-                "WHERE username=%s AND password=%s ")
-        cursor.execute(query, (username, hash_password(user_password)))
-        result_row = cursor.fetchone()
-        if result_row is None:
-            print("Login failed")
-        elif result_row[0]==username and  check_password(user_password, result_row[1]):
-            success = True
-        else:
+        success = login_successful(cursor, username, user_password)
+
+        if not success:
             print("Login failed")
 
-    print("Login success\n")
+    print("Login successful\n")
     cursor.close()
     return username
 
@@ -171,7 +175,7 @@ def user_permissions(db_connection, username):
 
     for (_, user_type) in cursor:
         if user_type == "admin":
-            result = ["search", "add", "delete", "edit"]
+            result = ["search", "add"]
         elif user_type == "individual":
             result = ["search"]
 

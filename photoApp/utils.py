@@ -28,6 +28,7 @@ def search(db_connection, username):
     directory = "/home/ImageLibrary/images/results_"+current_time
     cursor = db_connection.cursor()
     method = ""
+    success = False
     while method != "1" and method != "2":
         method = input("How would you like to search?\n 1: By image name\n 2: By tag\n 3: Show all images available current user\n")
         if method == "1":
@@ -39,8 +40,7 @@ def search(db_connection, username):
                     if not os.path.exists(directory):
                         os.makedirs(directory)
                     shutil.copyfile(reference, directory+"/"+name+"."+format)
-                else:
-                    print("Sorry, image could not be found or you do not have access to this image.")
+                    success = True                    
         elif method == "2":
 
             #Get the desired tags from the user
@@ -71,6 +71,8 @@ def search(db_connection, username):
             for photoID in cursor:
                 matching_photos.append(photoID[0])
             
+            if len(matching_photos) > 0:
+                success = True
             
             for photoID in matching_photos:
                 print("photoID ", photoID)
@@ -85,8 +87,10 @@ def search(db_connection, username):
             cursor.execute("SELECT name, reference, ownerID,format FROM Photos INNER JOIN Users ON Users.userID = Photos.ownerID WHERE username='{}'".format(username))
             print("\nYou have access to these photos:\n")
             for (name, reference, ownerID, format) in cursor:
-                print(name, reference, ownerID, format,"\n\n")
+                print(name, reference, ownerID, format,"")
 
+    if not success:
+        print("Sorry, images could not be found or you do not have access to this image.")
     cursor.close()     
     return
 
