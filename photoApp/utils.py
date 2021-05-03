@@ -118,21 +118,24 @@ def add(db_connection, username):
 
     #add image
     method = ""
-    while method != "1" and method != "2":
-        method = input("How would you like to add?\n 1: From Local machine\n 2: From URL\n")
+    retry = False
+    while method != "1" and method != "2" or retry:
+        if not retry:
+            method = input("\nHow would you like to add?\n 1: From local machine\n 2: From URL\n")
         if method == "1":
-            reference = input("Absolute path to image in docker volume (/home/ImageLibrary/images): ")
+            print("\nImages to add should be put inside the images/images_to_add directory because this is the volume mounted on the docker container")
+            reference = "/home/ImageLibrary/images/images_to_add/"+input("Image name (ie. my_image.png): ")
             if not os.path.isfile(reference):
                 print("Please ensure this file exists")
-                method = "-1"
+                retry = True 
                 continue 
 
             (file, name, format) = process_reference(reference)
             if get_valid_format(format) == None:
                 print("Sorry, currently only .png and .jpg files are supported.\n")
-                method = "-1"     
+                retry = True     
                 continue   
-
+            retry = False
             sizeBytes = os.path.getsize(reference)
             captureTime_ctime =ctime(os.path.getctime(reference))
             captureTime_datetime = datetime.datetime.strptime(captureTime_ctime, "%a %b %d %H:%M:%S %Y").strftime(time_format)
@@ -173,7 +176,7 @@ def add(db_connection, username):
     
 
     # add tags
-    tags = input("Add tags separated by whitespace: \n")
+    tags = input("\nAdd tags separated by whitespace: \n")
     if tags == "":
         cursor.close()
         return
