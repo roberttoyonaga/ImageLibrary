@@ -109,7 +109,34 @@ def get_valid_format(format):
     else:
         return None
     
-    
+def add_tags(db_connection, tag_string, name):
+    cursor = db_connection.cursor()
+    tags = tag_string.split()
+    for tag in tags:
+        # Update tag table
+        cursor.execute("SELECT tagName, tagID FROM Tags WHERE tagName='{}'".format(tag))
+        result_row = cursor.fetchone()
+        tagID = ""
+
+        # tag is new
+        if result_row is None: 
+            print("adding new tags to the Tags table", tag)
+            cursor.execute("INSERT INTO Tags (tagName) VALUES ('{}')".format(tag))
+            db_connection.commit()
+            cursor.execute("SELECT tagName, tagID FROM Tags WHERE tagName='{}'".format(tag))
+            tagID = cursor.fetchone()[1]
+        # tag already exists
+        else:
+            tagID = result_row[1]
+
+        #add tuple to PhotoTags
+        cursor.execute("SELECT photoID FROM Photos WHERE name='{}'".format(name))
+        photoID = cursor.fetchone()[0]
+
+        query = "INSERT INTO PhotoTags (tagID, photoID) VALUES (%s, %s)"
+        cursor.execute(query, (tagID, photoID))
+        db_connection.commit()
+    cursor.close()
 
 def add(db_connection, username):
     cursor = db_connection.cursor()
@@ -174,37 +201,11 @@ def add(db_connection, username):
 
     db_connection.commit()
     
-
+    cursor.close()
     # add tags
     tags = input("\nAdd tags separated by whitespace: \n")
     if tags == "":
-        cursor.close()
         return
 
-    tags = tags.split()
-    for tag in tags:
-        # Update tag table
-        cursor.execute("SELECT tagName, tagID FROM Tags WHERE tagName='{}'".format(tag))
-        result_row = cursor.fetchone()
-        tagID = ""
-
-        # tag is new
-        if result_row is None: 
-            print("adding new tags to the Tags table", tag)
-            cursor.execute("INSERT INTO Tags (tagName) VALUES ('{}')".format(tag))
-            db_connection.commit()
-            cursor.execute("SELECT tagName, tagID FROM Tags WHERE tagName='{}'".format(tag))
-            tagID = cursor.fetchone()[1]
-        # tag already exists
-        else:
-            tagID = result_row[1]
-
-        #add tuple to PhotoTags
-        cursor.execute("SELECT photoID FROM Photos WHERE name='{}'".format(name))
-        photoID = cursor.fetchone()[0]
-
-        query = "INSERT INTO PhotoTags (tagID, photoID) VALUES (%s, %s)"
-        cursor.execute(query, (tagID, photoID))
-        db_connection.commit()
-
-    cursor.close()
+    add_tags(db_connection,tags, name)
+    
