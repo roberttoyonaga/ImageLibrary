@@ -2,10 +2,7 @@ from getpass import getpass
 import mysql.connector as mysql
 import hashlib
 from utils import *
-def get_ownerID(cursor, username):
-    cursor.execute("SELECT username, userID FROM Users WHERE username='{}'".format(username))
-    ownerID = cursor.fetchone()[1] 
-    return ownerID
+
 def hash_password(password):
     return hashlib.sha3_256(password.encode()).hexdigest()
 
