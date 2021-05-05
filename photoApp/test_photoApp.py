@@ -1,6 +1,8 @@
 import unittest
-from .authentication import *
-from .utils import *
+import sys
+sys.path.insert(0, "/home/ImageLibrary/photoApp")
+from authentication import *
+from utils import *
 
 class TestReferenceProcessing(unittest.TestCase):
 

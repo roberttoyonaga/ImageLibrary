@@ -1,7 +1,11 @@
 from getpass import getpass
 import mysql.connector as mysql
 import hashlib
-
+from utils import *
+def get_ownerID(cursor, username):
+    cursor.execute("SELECT username, userID FROM Users WHERE username='{}'".format(username))
+    ownerID = cursor.fetchone()[1] 
+    return ownerID
 def hash_password(password):
     return hashlib.sha3_256(password.encode()).hexdigest()
 
@@ -39,11 +43,20 @@ def edit_account(db_connection, username):
         db_connection.commit()
         print("Password changed\n")
     elif action == "2":
+
+        #must delete in this order because of foreign key dependencies
+        ownerID = get_ownerID(cursor,username)        
+        
+        #delete all the users tags-photo associations
+        cursor.execute("DELETE FROM PhotoTags WHERE photoID IN (SELECT photoID FROM Photos WHERE ownerID='{}')".format(ownerID))
+        #delete all thr users photos
+        cursor.execute("DELETE FROM Photos WHERE ownerID='{}'".format(ownerID))
+        #delete the user's account
         cursor.execute("DELETE FROM Users WHERE username='{}'".format(username))
         db_connection.commit()
         print("Account deleted\n")
         exit(0)
-
+    cursor.close()
 
 def registration(db_connection):
     """

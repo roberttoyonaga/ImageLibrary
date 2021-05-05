@@ -30,7 +30,7 @@ def search(db_connection, username):
     method = ""
     success = False
     while method != "1" and method != "2":
-        method = input("How would you like to search?\n 1: By image name\n 2: By tag\n 3: Show all images available current user\n")
+        method = input("\nHow would you like to search?\n 1: By image name\n 2: By tag\n 3: Show all images available current user\n")
         if method == "1":
             name = input("Image Name: ")
             cursor.execute("SELECT name, reference, ownerID,format FROM Photos WHERE name='{}'".format(name))
@@ -47,7 +47,7 @@ def search(db_connection, username):
             print("These are all the available tags")
             cursor.execute("SELECT tagName FROM Tags")
             for (tagName) in cursor:
-                print(tagName,"\n")
+                print(tagName[0],"\n")
 
             requested_tags = input("Add tags separated by whitespace: \n").split()
 
@@ -87,7 +87,7 @@ def search(db_connection, username):
             cursor.execute("SELECT name, reference, ownerID,format FROM Photos INNER JOIN Users ON Users.userID = Photos.ownerID WHERE username='{}'".format(username))
             print("\nYou have access to these photos:\n")
             for (name, reference, ownerID, format) in cursor:
-                print(name, reference, ownerID, format,"")
+                print("Name: ",name," Format: ", format,"")
 
     if not success:
         print("Sorry, images could not be found or you do not have access to this image.")
@@ -120,7 +120,6 @@ def add_tags(db_connection, tag_string, name):
 
         # tag is new
         if result_row is None: 
-            print("adding new tags to the Tags table", tag)
             cursor.execute("INSERT INTO Tags (tagName) VALUES ('{}')".format(tag))
             db_connection.commit()
             cursor.execute("SELECT tagName, tagID FROM Tags WHERE tagName='{}'".format(tag))
